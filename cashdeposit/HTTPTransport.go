@@ -45,9 +45,9 @@ func NewHTTPHandler(e Endpoints, logger log.Logger) http.Handler {
 
 	r := mux.NewRouter()
 
-	r.Handle("/v1/cash-deposits", listDepositsHandler).Methods("GET")
-	r.Handle("/v1/cash-deposits", newDepositHandler).Methods("POST")
-	r.Handle("/v1/cash-deposits/account/{accountID}/balance", totalBalanceHandler).Methods("GET")
+	r.Handle("/cash-deposit/v1/deposits", listDepositsHandler).Methods("GET")
+	r.Handle("/cash-deposit/v1/deposits", newDepositHandler).Methods("POST")
+	r.Handle("/cash-deposit/v1/deposits/account/{accountID}/balance", totalBalanceHandler).Methods("GET")
 
 	return r
 }
@@ -94,7 +94,7 @@ func err2code(err error) int {
 
 type errorWrapper struct {
 	Code  int    `json:"code,omitempty"`
-	Error string `json:"messsage"`
+	Error string `json:"message"`
 }
 
 // encodeHTTPGenericResponse is a transport/http.EncodeResponseFunc that encodes

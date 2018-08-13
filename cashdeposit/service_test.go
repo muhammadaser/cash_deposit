@@ -18,7 +18,7 @@ import (
 )
 
 var clock = clockwork.NewFakeClock()
-var baseUrl = "/v1/cash-deposits"
+var baseUrl = "/cash-deposit/v1/deposits"
 var listDepositsEmpty = []cashdeposit.CashDeposit{}
 var listDeposits = []cashdeposit.CashDeposit{
 	{

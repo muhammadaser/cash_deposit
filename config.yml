@@ -1,0 +1,41 @@
+dev:
+  address: ":8080"
+  log:
+    fileName: "D:\\log\\cash_deposit.log"
+    maxSize : 1 
+    MaxBackups : 10
+  
+  pg:
+    addr: "localhost"
+    port: "5432"
+    username: "postgres"
+    password: ""
+    database: "deposit"
+
+stag:
+  address: ":8080"
+  log:
+    fileName: "/var/log/cashdeposit/cashdeposit.log"
+    maxSize : 1 
+    MaxBackups : 10
+
+  pg:
+    addr: "localhost"
+    port: "5432"
+    username: "postgres"
+    password: ""
+    database: "deposit"
+
+prod:
+  address: ":8080"
+  log:
+    fileName: "/var/log/cashdeposit/cashdeposit.log"
+    maxSize : 1 
+    MaxBackups : 10
+
+  pg:
+    addr: "localhost"
+    port: "5432"
+    username: "postgres"
+    password: ""
+    database: "deposit"

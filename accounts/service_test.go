@@ -19,7 +19,7 @@ import (
 )
 
 var clock = clockwork.NewFakeClock()
-var baseUrl = "/v1/accounts"
+var baseUrl = "/cash-deposit/v1/accounts"
 var listAccountsEmty = []accounts.Account{}
 var listAccounts = []accounts.Account{
 	{
