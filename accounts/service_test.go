@@ -115,6 +115,12 @@ func TestAccount(t *testing.T) {
 			err:        accounts.ErrDatabase,
 			goldenFile: "testdata/account/failure-db-error",
 		},
+		"Failure While accountID empty": {
+			input:      "",
+			output:     singleAccountEmpty,
+			err:        accounts.ErrDatabase,
+			goldenFile: "testdata/account/failure-accountID-empty",
+		},
 	}
 
 	for testName, test := range tests {

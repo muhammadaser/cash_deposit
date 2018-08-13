@@ -33,9 +33,10 @@ type Account struct {
 	Address   string `json:"address" valid:"required"`
 }
 
-func (s *setStore) GetListAccounts() (accounts []Account, err error) {
-	_, err = s.pgDB.Query(&accounts, "select * from public.account")
-	return
+func (s *setStore) GetListAccounts() ([]Account, error) {
+	accounts := []Account{}
+	_, err := s.pgDB.Query(&accounts, "select * from public.account")
+	return accounts, err
 }
 func (s *setStore) GetAccount(accountID string) (Account, error) {
 	account := Account{}

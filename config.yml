@@ -9,7 +9,7 @@ dev:
     addr: "localhost"
     port: "5432"
     username: "postgres"
-    password: ""
+    password: "12345"
     database: "deposit"
 
 stag:

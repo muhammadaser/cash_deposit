@@ -11,6 +11,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/muhammadaser/cash_deposit/accounts"
+	"github.com/muhammadaser/cash_deposit/cashdeposit"
 	cf "github.com/muhammadaser/cash_deposit/config"
 
 	"github.com/go-kit/kit/log"
@@ -67,15 +68,17 @@ func main() {
 
 	logger = log.With(logger, "p", "deposits")
 	var (
-		DepositsService     = accounts.New(logger, pgDB)
-		DepositsEndpoints   = accounts.NewEndpoint(DepositsService, logger)
-		DepositsHTTPHandler = accounts.NewHTTPHandler(DepositsEndpoints, httpLogger)
+		DepositsService     = cashdeposit.New(logger, pgDB)
+		DepositsEndpoints   = cashdeposit.NewEndpoint(DepositsService, logger)
+		DepositsHTTPHandler = cashdeposit.NewHTTPHandler(DepositsEndpoints, httpLogger)
 	)
 
 	mux := http.NewServeMux()
 
 	mux.Handle("/cash-deposit/v1/accounts", AccountsHTTPHandler)
+	mux.Handle("/cash-deposit/v1/accounts/", AccountsHTTPHandler)
 	mux.Handle("/cash-deposit/v1/deposits", DepositsHTTPHandler)
+	mux.Handle("/cash-deposit/v1/deposits/", DepositsHTTPHandler)
 
 	httpHandler := accessControl(mux)
 

@@ -40,7 +40,7 @@ type TotalBalance struct {
 func (s *setStore) GetListDeposits() ([]CashDeposit, error) {
 	cashDeposits := []CashDeposit{}
 	_, err := s.pgDB.Query(&cashDeposits, "select * from public.cash_deposit")
-	return nil, err
+	return cashDeposits, err
 }
 func (s *setStore) GetTotalBalance(accountID string) (TotalBalance, error) {
 	tb := TotalBalance{}
