@@ -9,6 +9,7 @@ import (
 // Store of products
 type Store interface {
 	GetListDeposits() ([]CashDeposit, error)
+	GetListDepositsByAccount(accountID string) ([]CashDeposit, error)
 	GetTotalBalance(accountID string) (TotalBalance, error)
 	PostDeposit(deposit CashDeposit) error
 }
@@ -42,9 +43,22 @@ func (s *setStore) GetListDeposits() ([]CashDeposit, error) {
 	_, err := s.pgDB.Query(&cashDeposits, "select * from public.cash_deposit")
 	return cashDeposits, err
 }
+func (s *setStore) GetListDepositsByAccount(accountID string) ([]CashDeposit, error) {
+	cashDeposits := []CashDeposit{}
+	_, err := s.pgDB.Query(
+		&cashDeposits,
+		"select * from public.cash_deposit where account_id = ?0",
+		accountID,
+	)
+	return cashDeposits, err
+}
 func (s *setStore) GetTotalBalance(accountID string) (TotalBalance, error) {
 	tb := TotalBalance{}
-	_, err := s.pgDB.Query(&tb, "select sum(deposit_amount) as balance from public.cash_deposit")
+	_, err := s.pgDB.Query(
+		&tb,
+		"select sum(deposit_amount) as balance from public.cash_deposit where account_id=?0",
+		accountID,
+	)
 	return tb, err
 }
 func (s *setStore) PostDeposit(deposit CashDeposit) error {

@@ -10,9 +10,10 @@ import (
 
 // Endpoints list of Service endpoint
 type Endpoints struct {
-	ListDepositsEndpoint endpoint.Endpoint
-	TotalBalanceEndpoint endpoint.Endpoint
-	NewDepositEndpoint   endpoint.Endpoint
+	ListDepositsEndpoint          endpoint.Endpoint
+	ListDepositsByAccountEndpoint endpoint.Endpoint
+	TotalBalanceEndpoint          endpoint.Endpoint
+	NewDepositEndpoint            endpoint.Endpoint
 }
 
 // NewEndpoint return Endpoints
@@ -21,6 +22,11 @@ func NewEndpoint(svc Service, logger log.Logger) Endpoints {
 	{
 		listDepositsEndpoint = MakeListDepositsEndpoint(svc)
 		listDepositsEndpoint = LoggingEndpointMiddleware(logger)(listDepositsEndpoint)
+	}
+	var listDepositsByAccountEndpoint endpoint.Endpoint
+	{
+		listDepositsByAccountEndpoint = MakeListDepositsByAccountEndpoint(svc)
+		listDepositsByAccountEndpoint = LoggingEndpointMiddleware(logger)(listDepositsByAccountEndpoint)
 	}
 	var totalBalanceEndpoint endpoint.Endpoint
 	{
@@ -34,9 +40,10 @@ func NewEndpoint(svc Service, logger log.Logger) Endpoints {
 	}
 
 	return Endpoints{
-		ListDepositsEndpoint: listDepositsEndpoint,
-		TotalBalanceEndpoint: totalBalanceEndpoint,
-		NewDepositEndpoint:   newDepositsEndpoint,
+		ListDepositsEndpoint:          listDepositsEndpoint,
+		ListDepositsByAccountEndpoint: listDepositsByAccountEndpoint,
+		TotalBalanceEndpoint:          totalBalanceEndpoint,
+		NewDepositEndpoint:            newDepositsEndpoint,
 	}
 }
 
@@ -46,6 +53,22 @@ func MakeListDepositsEndpoint(svc Service) endpoint.Endpoint {
 		// req := request.(listDepositsRequest)
 		d, err := svc.ListDeposits()
 		res := listDepositsResponse{CashDeposit: d, Err: err}
+		if err == nil {
+			res.Code = http.StatusOK
+			res.Message = "success"
+		} else {
+			res.Message = err.Error()
+		}
+		return res, nil
+	}
+}
+
+// MakeListDepositsByAccountEndpoint for list cash by account deposit
+func MakeListDepositsByAccountEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(listDepositsByAccountRequest)
+		d, err := svc.ListDepositsByAcount(req.AccountID)
+		res := listDepositsByAccountResponse{CashDeposit: d, Err: err}
 		if err == nil {
 			res.Code = http.StatusOK
 			res.Message = "success"
@@ -107,6 +130,20 @@ type listDepositsResponse struct {
 }
 
 func (r listDepositsResponse) Failed() error { return r.Err }
+
+//====== List Account ======
+type listDepositsByAccountRequest struct {
+	AccountID string
+}
+
+type listDepositsByAccountResponse struct {
+	Code        int           `json:"code,omitempty"`
+	Message     string        `json:"message,omitempty"`
+	CashDeposit []CashDeposit `json:"data"`
+	Err         error         `json:"-"`
+}
+
+func (r listDepositsByAccountResponse) Failed() error { return r.Err }
 
 //====== Account ======
 type totalBalanceRequest struct {

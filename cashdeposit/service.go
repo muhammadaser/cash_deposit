@@ -18,6 +18,7 @@ var (
 // Service of accounts
 type Service interface {
 	ListDeposits() ([]CashDeposit, error)
+	ListDepositsByAcount(accountID string) ([]CashDeposit, error)
 	TotalBalance(accountID string) (TotalBalance, error)
 	NewDeposits(deposit CashDeposit) error
 }
@@ -55,6 +56,13 @@ func (s *setService) ListDeposits() ([]CashDeposit, error) {
 	}
 	return deposits, nil
 }
+func (s *setService) ListDepositsByAcount(accountID string) ([]CashDeposit, error) {
+	deposits, err := s.store.GetListDepositsByAccount(accountID)
+	if err != nil {
+		return deposits, ErrDatabase
+	}
+	return deposits, nil
+}
 func (s *setService) TotalBalance(accountID string) (TotalBalance, error) {
 	balance, err := s.store.GetTotalBalance(accountID)
 	if err != nil {
@@ -63,6 +71,7 @@ func (s *setService) TotalBalance(accountID string) (TotalBalance, error) {
 	return balance, nil
 }
 func (s *setService) NewDeposits(deposit CashDeposit) error {
+	deposit.DepositDate = s.t.Now()
 	err := s.store.PostDeposit(deposit)
 	if err != nil {
 		return ErrDatabase

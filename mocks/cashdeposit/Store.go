@@ -32,6 +32,29 @@ func (_m *Store) GetListDeposits() ([]cashdeposit.CashDeposit, error) {
 	return r0, r1
 }
 
+// GetListDepositsByAccount provides a mock function with given fields: accountID
+func (_m *Store) GetListDepositsByAccount(accountID string) ([]cashdeposit.CashDeposit, error) {
+	ret := _m.Called(accountID)
+
+	var r0 []cashdeposit.CashDeposit
+	if rf, ok := ret.Get(0).(func(string) []cashdeposit.CashDeposit); ok {
+		r0 = rf(accountID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]cashdeposit.CashDeposit)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(accountID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetTotalBalance provides a mock function with given fields: accountID
 func (_m *Store) GetTotalBalance(accountID string) (cashdeposit.TotalBalance, error) {
 	ret := _m.Called(accountID)

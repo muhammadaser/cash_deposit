@@ -34,9 +34,81 @@ var listDeposits = []cashdeposit.CashDeposit{
 		DepositAmount: 100000,
 	},
 }
+var listDepositsByAccount = []cashdeposit.CashDeposit{
+	{
+		DepositID:     "201808013849",
+		AccountID:     "03212546",
+		DepositDate:   clock.Now(),
+		DepositAmount: 300000,
+	},
+	{
+		DepositID:     "201808013850",
+		AccountID:     "03212546",
+		DepositDate:   clock.Now(),
+		DepositAmount: 800000,
+	},
+	{
+		DepositID:     "201808013851",
+		AccountID:     "03212546",
+		DepositDate:   clock.Now(),
+		DepositAmount: 900000,
+	},
+}
 var singleDeposit = listDeposits[0]
 var singleDepositEmpty = cashdeposit.CashDeposit{}
 
+func TestListDepositsByAccount(t *testing.T) {
+	tests := map[string]struct {
+		input      string
+		output     []cashdeposit.CashDeposit
+		err        error
+		goldenFile string
+	}{
+		"Success": {
+			input:      listDepositsByAccount[0].AccountID,
+			output:     listDepositsByAccount,
+			err:        nil,
+			goldenFile: "testdata/list-deposits-by-account/success",
+		},
+		"Success while list empty": {
+			input:      listDepositsByAccount[0].AccountID,
+			output:     listDepositsEmpty,
+			err:        nil,
+			goldenFile: "testdata/list-deposits-by-account/success-whlie-empty",
+		},
+		"Failure While db error": {
+			input:      listDepositsByAccount[0].AccountID,
+			output:     listDepositsEmpty,
+			err:        cashdeposit.ErrDatabase,
+			goldenFile: "testdata/list-deposits-by-account/failure-db-error",
+		},
+	}
+
+	for testName, test := range tests {
+		t.Run(testName, func(t *testing.T) {
+			res := httptest.NewRecorder()
+			url := baseUrl + "/account/" + test.input
+			req, err := http.NewRequest("GET", url, nil)
+			assert.Nil(t, err)
+
+			s := new(mockStore.Store)
+			s.On("GetListDepositsByAccount", test.input).
+				Return(test.output, test.err).
+				Maybe()
+
+			svc := cashdeposit.NewService(s, clock)
+			svc = cashdeposit.NewValidationMiddleware()(svc)
+
+			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
+			handler := cashdeposit.NewHTTPHandler(endpoint, log.NewNopLogger())
+
+			handler.ServeHTTP(res, req)
+			goldie.Assert(t, test.goldenFile, res.Body.Bytes())
+
+			s.AssertExpectations(t)
+		})
+	}
+}
 func TestListDeposits(t *testing.T) {
 	tests := map[string]struct {
 		output     []cashdeposit.CashDeposit

@@ -70,6 +70,39 @@ Halaman Deposit History merupakah halaman yang menampilkan history dari transaks
 
 Halaman Cash Deposit merupakan halaman untuk transaksi deposit uang ke bank. Halaman ini menampilkan form inputan untuk deposit uang ke account nasabah.
 
-- get total balance
-- get list deposit
-- post deposit 
+
+## Database Schema
+
+Pertama buatlah database dengan nama `deposit`. Setelah itu buat tabel pada schema public dengan memasukan script berikut.
+
+```sql
+CREATE TABLE account (
+    account_id character varying(16) NOT NULL,
+    first_name character varying(128),
+    last_name character varying(128),
+    email character varying(256),
+    phone_no character varying(16),
+    address character varying(256)
+);
+
+CREATE TABLE cash_deposit (
+    deposit_id character varying(32) NOT NULL,
+    account_id character varying(16),
+    deposit_date timestamp without time zone,
+    deposit_amount bigint
+);
+
+ALTER TABLE ONLY account
+    ADD CONSTRAINT account_pkey PRIMARY KEY (account_id);
+
+ALTER TABLE ONLY cash_deposit
+    ADD CONSTRAINT cash_deposit_pkey PRIMARY KEY (deposit_id);
+
+ALTER TABLE ONLY cash_deposit
+    ADD CONSTRAINT fk_cash_deposit_account FOREIGN KEY (account_id) REFERENCES account(account_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+INSERT INTO  account (account_id, first_name, last_name, email, phone_no, address) VALUES
+('03212546', 'Jhone', 'Doe', 'jhone.doe@gmail.com', '085263123456', 'Jakarta'),
+('03253548', 'Nathan', 'Dyer', 'nathan.dyer@gmail.com', '085263123457', 'Jakarta');
+
+```
