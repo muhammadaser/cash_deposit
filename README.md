@@ -106,3 +106,7 @@ INSERT INTO  account (account_id, first_name, last_name, email, phone_no, addres
 ('03253548', 'Nathan', 'Dyer', 'nathan.dyer@gmail.com', '085263123457', 'Jakarta');
 
 ```
+
+## Mail Trap
+
+untuk kirim notif ke email, saya menggunakan mail trap, untuk masuk ke halamn mail trap, bisa melalui url [mailtrap.io](https://mailtrap.io/signin). Gunakan username : `muhammadaser@gmail.com` dan password `12345678` untuk masuk ke halaman dashboard mailtrap.

@@ -6,6 +6,8 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-pg/pg"
 	"github.com/jonboulle/clockwork"
+
+	"github.com/muhammadaser/cash_deposit/accounts"
 )
 
 var (
@@ -30,9 +32,19 @@ func New(logger log.Logger, pgDB *pg.DB) Service {
 		s = NewStore(pgDB)
 		s = NewStoreLogMiddleware(logger)(s)
 	}
+	var as accounts.Store
+	{
+		as = accounts.NewStore(pgDB)
+		as = accounts.NewStoreLogMiddleware(logger)(as)
+	}
+	var mail Mail
+	{
+		mail = NewMail(as)
+		mail = NewMailLogMiddleware(logger)(mail)
+	}
 	var svc Service
 	{
-		svc = NewService(s, clockwork.NewRealClock())
+		svc = NewService(s, clockwork.NewRealClock(), mail)
 		svc = NewValidationMiddleware()(svc)
 		svc = NewServiceLogMiddleware(logger)(svc)
 	}
@@ -42,11 +54,12 @@ func New(logger log.Logger, pgDB *pg.DB) Service {
 type setService struct {
 	store Store
 	t     clockwork.Clock
+	mail  Mail
 }
 
 // NewService return the struct that implements Service
-func NewService(store Store, t clockwork.Clock) Service {
-	return &setService{store, t}
+func NewService(store Store, t clockwork.Clock, mail Mail) Service {
+	return &setService{store, t, mail}
 }
 
 func (s *setService) ListDeposits() ([]CashDeposit, error) {
@@ -76,5 +89,6 @@ func (s *setService) NewDeposits(deposit CashDeposit) error {
 	if err != nil {
 		return ErrDatabase
 	}
+	go s.mail.SendReceiptNotif(deposit)
 	return nil
 }

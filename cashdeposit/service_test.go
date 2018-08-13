@@ -12,7 +12,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/muhammadaser/cash_deposit/accounts"
 	"github.com/muhammadaser/cash_deposit/cashdeposit"
-	mockStore "github.com/muhammadaser/cash_deposit/mocks/cashdeposit"
+	mockFile "github.com/muhammadaser/cash_deposit/mocks/cashdeposit"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
 )
@@ -91,12 +91,13 @@ func TestListDepositsByAccount(t *testing.T) {
 			req, err := http.NewRequest("GET", url, nil)
 			assert.Nil(t, err)
 
-			s := new(mockStore.Store)
+			s := new(mockFile.Store)
 			s.On("GetListDepositsByAccount", test.input).
 				Return(test.output, test.err).
 				Maybe()
+			mail := new(mockFile.Mail)
 
-			svc := cashdeposit.NewService(s, clock)
+			svc := cashdeposit.NewService(s, clock, mail)
 			svc = cashdeposit.NewValidationMiddleware()(svc)
 
 			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
@@ -138,12 +139,13 @@ func TestListDeposits(t *testing.T) {
 			req, err := http.NewRequest("GET", baseUrl, nil)
 			assert.Nil(t, err)
 
-			s := new(mockStore.Store)
+			s := new(mockFile.Store)
 			s.On("GetListDeposits").
 				Return(test.output, test.err).
 				Maybe()
+			mail := new(mockFile.Mail)
 
-			svc := cashdeposit.NewService(s, clock)
+			svc := cashdeposit.NewService(s, clock, mail)
 			svc = cashdeposit.NewValidationMiddleware()(svc)
 
 			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
@@ -195,12 +197,13 @@ func TestTotalBalance(t *testing.T) {
 			req, err := http.NewRequest("GET", url, nil)
 			assert.Nil(t, err)
 
-			s := new(mockStore.Store)
+			s := new(mockFile.Store)
 			s.On("GetTotalBalance", test.input).
 				Return(test.output, test.err).
 				Maybe()
+			mail := new(mockFile.Mail)
 
-			svc := cashdeposit.NewService(s, clock)
+			svc := cashdeposit.NewService(s, clock, mail)
 			svc = cashdeposit.NewValidationMiddleware()(svc)
 
 			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
@@ -224,27 +227,39 @@ func TestNewCashDeposit(t *testing.T) {
 
 	tests := map[string]struct {
 		input      cashdeposit.CashDeposit
-		err        error
+		errs       map[string]error
 		goldenFile string
 	}{
 		"Success": {
-			input:      singleDeposit,
-			err:        nil,
+			input: singleDeposit,
+			errs: map[string]error{
+				"PostDeposit":      nil,
+				"SendReceiptNotif": nil,
+			},
 			goldenFile: "testdata/new-cash-deposit/success",
 		},
 		"Failure While db error": {
-			input:      singleDeposit,
-			err:        accounts.ErrDatabase,
+			input: singleDeposit,
+			errs: map[string]error{
+				"PostDeposit":      accounts.ErrDatabase,
+				"SendReceiptNotif": nil,
+			},
 			goldenFile: "testdata/new-cash-deposit/failure-db-error",
 		},
 		"Failure While accountID not exits": {
-			input:      singleDepositNoAccountID,
-			err:        nil,
+			input: singleDepositNoAccountID,
+			errs: map[string]error{
+				"PostDeposit":      nil,
+				"SendReceiptNotif": nil,
+			},
 			goldenFile: "testdata/new-cash-deposit/failure-accountid-not-exist",
 		},
 		"Failure While deposit amount is zero": {
-			input:      singleDepositZeroAmount,
-			err:        nil,
+			input: singleDepositZeroAmount,
+			errs: map[string]error{
+				"PostDeposit":      nil,
+				"SendReceiptNotif": nil,
+			},
 			goldenFile: "testdata/new-cash-deposit/failure-amount-zero",
 		},
 	}
@@ -257,12 +272,16 @@ func TestNewCashDeposit(t *testing.T) {
 			req, err := http.NewRequest("POST", baseUrl, bytes.NewBuffer(jsonString))
 			assert.Nil(t, err)
 
-			s := new(mockStore.Store)
+			s := new(mockFile.Store)
 			s.On("PostDeposit", test.input).
-				Return(test.err).
+				Return(test.errs["PostDeposit"]).
+				Maybe()
+			mail := new(mockFile.Mail)
+			mail.On("SendReceiptNotif", test.input).
+				Return(test.errs["SendReceiptNotif"]).
 				Maybe()
 
-			svc := cashdeposit.NewService(s, clock)
+			svc := cashdeposit.NewService(s, clock, mail)
 			svc = cashdeposit.NewValidationMiddleware()(svc)
 
 			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
