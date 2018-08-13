@@ -52,3 +52,17 @@ func (_m *Store) GetTotalBalance(accountID string) (cashdeposit.TotalBalance, er
 
 	return r0, r1
 }
+
+// PostDeposit provides a mock function with given fields: deposit
+func (_m *Store) PostDeposit(deposit cashdeposit.CashDeposit) error {
+	ret := _m.Called(deposit)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(cashdeposit.CashDeposit) error); ok {
+		r0 = rf(deposit)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

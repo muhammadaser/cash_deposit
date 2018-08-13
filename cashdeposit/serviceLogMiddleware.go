@@ -2,6 +2,7 @@ package cashdeposit
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
@@ -38,22 +39,14 @@ func (mw *serviceLogMiddleware) TotalBalance(accountID string) (balacne TotalBal
 	return mw.next.TotalBalance(accountID)
 }
 
-// func (mw *serviceLogMiddleware) Account(accountID string) (account Account, err error) {
-// 	defer func() {
-// 		jsonString, _ := json.Marshal(account)
-// 		mw.logger.Log("method", "Account", "accountID", accountID, "account", jsonString, "err", err)
-// 	}()
+func (mw *serviceLogMiddleware) NewDeposits(deposit CashDeposit) (err error) {
+	defer func() {
+		jsonString, _ := json.Marshal(deposit)
+		mw.logger.Log("method", "NewDeposits", "deposit", jsonString, "err", err)
+	}()
 
-// 	return mw.next.Account(accountID)
-// }
-// func (mw *serviceLogMiddleware) NewAccount(account Account) (err error) {
-// 	defer func() {
-// 		jsonString, _ := json.Marshal(account)
-// 		mw.logger.Log("method", "NewAccount", "account", jsonString, "err", err)
-// 	}()
-
-// 	return mw.next.NewAccount(account)
-// }
+	return mw.next.NewDeposits(deposit)
+}
 
 // LoggingEndpointMiddleware returns an endpoint middleware that logs the
 // duration of each invocation, and the resulting error, if any.

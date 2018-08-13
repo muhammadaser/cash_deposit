@@ -19,6 +19,7 @@ var (
 type Service interface {
 	ListDeposits() ([]CashDeposit, error)
 	TotalBalance(accountID string) (TotalBalance, error)
+	NewDeposits(deposit CashDeposit) error
 }
 
 // New return Service
@@ -60,4 +61,11 @@ func (s *setService) TotalBalance(accountID string) (TotalBalance, error) {
 		return balance, err
 	}
 	return balance, nil
+}
+func (s *setService) NewDeposits(deposit CashDeposit) error {
+	err := s.store.PostDeposit(deposit)
+	if err != nil {
+		return ErrDatabase
+	}
+	return nil
 }

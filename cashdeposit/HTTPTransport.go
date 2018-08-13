@@ -36,16 +36,17 @@ func NewHTTPHandler(e Endpoints, logger log.Logger) http.Handler {
 		encodeHTTPGenericResponse,
 		options...,
 	)
-	// newAccountsHandler := httptransport.NewServer(
-	// 	e.NewAccountEndpoint,
-	// 	decodeHTTPNewAccount,
-	// 	encodeHTTPGenericResponse,
-	// 	options...,
-	// )
+	newDepositHandler := httptransport.NewServer(
+		e.NewDepositEndpoint,
+		decodeHTTPNewDeposit,
+		encodeHTTPGenericResponse,
+		options...,
+	)
 
 	r := mux.NewRouter()
 
 	r.Handle("/v1/cash-deposits", listDepositsHandler).Methods("GET")
+	r.Handle("/v1/cash-deposits", newDepositHandler).Methods("POST")
 	r.Handle("/v1/cash-deposits/account/{accountID}/balance", totalBalanceHandler).Methods("GET")
 
 	return r
@@ -66,15 +67,15 @@ func decodeHTTPTotalBalance(_ context.Context, r *http.Request) (request interfa
 	}, nil
 }
 
-// func decodeHTTPNewAccount(_ context.Context, r *http.Request) (request interface{}, err error) {
-// 	req := newAccountRequest{}
+func decodeHTTPNewDeposit(_ context.Context, r *http.Request) (request interface{}, err error) {
+	req := newDepositsRequest{}
 
-// 	if e := json.NewDecoder(r.Body).Decode(&req.Ac); e != nil {
-// 		return nil, e
-// 	}
+	if e := json.NewDecoder(r.Body).Decode(&req.Dp); e != nil {
+		return nil, e
+	}
 
-// 	return req, nil
-// }
+	return req, nil
+}
 
 func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 	code := err2code(err)

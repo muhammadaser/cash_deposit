@@ -12,7 +12,7 @@ import (
 type Endpoints struct {
 	ListDepositsEndpoint endpoint.Endpoint
 	TotalBalanceEndpoint endpoint.Endpoint
-	// NewAccountEndpoint   endpoint.Endpoint
+	NewDepositEndpoint   endpoint.Endpoint
 }
 
 // NewEndpoint return Endpoints
@@ -27,16 +27,16 @@ func NewEndpoint(svc Service, logger log.Logger) Endpoints {
 		totalBalanceEndpoint = MakeTotalBalanceEndpoint(svc)
 		totalBalanceEndpoint = LoggingEndpointMiddleware(logger)(totalBalanceEndpoint)
 	}
-	// var newAccountEndpoint endpoint.Endpoint
-	// {
-	// 	newAccountEndpoint = MakeNewAccountEndpoint(svc)
-	// 	newAccountEndpoint = LoggingEndpointMiddleware(logger)(newAccountEndpoint)
-	// }
+	var newDepositsEndpoint endpoint.Endpoint
+	{
+		newDepositsEndpoint = MakeNewDepositsEndpoint(svc)
+		newDepositsEndpoint = LoggingEndpointMiddleware(logger)(newDepositsEndpoint)
+	}
 
 	return Endpoints{
 		ListDepositsEndpoint: listDepositsEndpoint,
 		TotalBalanceEndpoint: totalBalanceEndpoint,
-		// NewAccountEndpoint:   newAccountEndpoint,
+		NewDepositEndpoint:   newDepositsEndpoint,
 	}
 }
 
@@ -72,21 +72,21 @@ func MakeTotalBalanceEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-// // MakeNewAccountEndpoint for New account
-// func MakeNewAccountEndpoint(svc Service) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(newAccountRequest)
-// 		err = svc.NewAccount(req.Ac)
-// 		res := newAccountResponse{Err: err}
-// 		if err == nil {
-// 			res.Code = http.StatusOK
-// 			res.Message = "success"
-// 		} else {
-// 			res.Message = err.Error()
-// 		}
-// 		return res, nil
-// 	}
-// }
+// MakeNewDepositsEndpoint for New account
+func MakeNewDepositsEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(newDepositsRequest)
+		err = svc.NewDeposits(req.Dp)
+		res := newDepositsResponse{Err: err}
+		if err == nil {
+			res.Code = http.StatusOK
+			res.Message = "success"
+		} else {
+			res.Message = err.Error()
+		}
+		return res, nil
+	}
+}
 
 // Failer is an interface that should be implemented by response types.
 // Response encoders can check if responses are Failer, and if so if they've
@@ -122,15 +122,15 @@ type totalBalanceResponse struct {
 
 func (r totalBalanceResponse) Failed() error { return r.Err }
 
-// //====== New Account ======
-// type newAccountRequest struct {
-// 	Ac Account
-// }
+//====== New Account ======
+type newDepositsRequest struct {
+	Dp CashDeposit
+}
 
-// type newAccountResponse struct {
-// 	Code    int    `json:"code,omitempty"`
-// 	Message string `json:"message,omitempty"`
-// 	Err     error  `json:"-"`
-// }
+type newDepositsResponse struct {
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+	Err     error  `json:"-"`
+}
 
-// func (r newAccountResponse) Failed() error { return r.Err }
+func (r newDepositsResponse) Failed() error { return r.Err }

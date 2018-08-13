@@ -1,6 +1,8 @@
 package cashdeposit_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,6 +10,7 @@ import (
 	"github.com/jonboulle/clockwork"
 
 	"github.com/go-kit/kit/log"
+	"github.com/muhammadaser/cash_deposit/accounts"
 	"github.com/muhammadaser/cash_deposit/cashdeposit"
 	mockStore "github.com/muhammadaser/cash_deposit/mocks/cashdeposit"
 	"github.com/sebdah/goldie"
@@ -123,6 +126,68 @@ func TestTotalBalance(t *testing.T) {
 			s := new(mockStore.Store)
 			s.On("GetTotalBalance", test.input).
 				Return(test.output, test.err).
+				Maybe()
+
+			svc := cashdeposit.NewService(s, clock)
+			svc = cashdeposit.NewValidationMiddleware()(svc)
+
+			endpoint := cashdeposit.NewEndpoint(svc, log.NewNopLogger())
+			handler := cashdeposit.NewHTTPHandler(endpoint, log.NewNopLogger())
+
+			handler.ServeHTTP(res, req)
+			goldie.Assert(t, test.goldenFile, res.Body.Bytes())
+
+			s.AssertExpectations(t)
+		})
+	}
+}
+
+func TestNewCashDeposit(t *testing.T) {
+
+	singleDepositNoAccountID := singleDeposit
+	singleDepositNoAccountID.AccountID = ""
+
+	singleDepositZeroAmount := singleDeposit
+	singleDepositZeroAmount.DepositAmount = 0
+
+	tests := map[string]struct {
+		input      cashdeposit.CashDeposit
+		err        error
+		goldenFile string
+	}{
+		"Success": {
+			input:      singleDeposit,
+			err:        nil,
+			goldenFile: "testdata/new-cash-deposit/success",
+		},
+		"Failure While db error": {
+			input:      singleDeposit,
+			err:        accounts.ErrDatabase,
+			goldenFile: "testdata/new-cash-deposit/failure-db-error",
+		},
+		"Failure While accountID not exits": {
+			input:      singleDepositNoAccountID,
+			err:        nil,
+			goldenFile: "testdata/new-cash-deposit/failure-accountid-not-exist",
+		},
+		"Failure While deposit amount is zero": {
+			input:      singleDepositZeroAmount,
+			err:        nil,
+			goldenFile: "testdata/new-cash-deposit/failure-amount-zero",
+		},
+	}
+
+	for testName, test := range tests {
+		t.Run(testName, func(t *testing.T) {
+			res := httptest.NewRecorder()
+			jsonString, err := json.Marshal(test.input)
+			assert.Nil(t, err)
+			req, err := http.NewRequest("POST", baseUrl, bytes.NewBuffer(jsonString))
+			assert.Nil(t, err)
+
+			s := new(mockStore.Store)
+			s.On("PostDeposit", test.input).
+				Return(test.err).
 				Maybe()
 
 			svc := cashdeposit.NewService(s, clock)

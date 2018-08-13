@@ -10,7 +10,7 @@ import (
 type Store interface {
 	GetListDeposits() ([]CashDeposit, error)
 	GetTotalBalance(accountID string) (TotalBalance, error)
-	// PostAccount(account Account) error
+	PostDeposit(deposit CashDeposit) error
 }
 
 // NewStore return struct that implement store interface
@@ -47,12 +47,6 @@ func (s *setStore) GetTotalBalance(accountID string) (TotalBalance, error) {
 	_, err := s.pgDB.Query(&tb, "select sum(deposit_amount) as balance from public.cash_deposit")
 	return tb, err
 }
-
-// func (s *setStore) GetAccount(accountID string) (Account, error) {
-// 	account := Account{}
-// 	_, err := s.pgDB.QueryOne(&account, "select * from public.account where account_id=?", accountID)
-// 	return account, err
-// }
-// func (s *setStore) PostAccount(account Account) error {
-// 	return s.pgDB.Insert(&account)
-// }
+func (s *setStore) PostDeposit(deposit CashDeposit) error {
+	return s.pgDB.Insert(&deposit)
+}

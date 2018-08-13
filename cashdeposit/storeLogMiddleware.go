@@ -31,3 +31,10 @@ func (mw *storeLogMiddleware) GetTotalBalance(accountID string) (balance TotalBa
 
 	return mw.next.GetTotalBalance(accountID)
 }
+func (mw *storeLogMiddleware) PostDeposit(deposit CashDeposit) (err error) {
+	defer func() {
+		mw.logger.Log("method", "PostDeposit", "err", err)
+	}()
+
+	return mw.next.PostDeposit(deposit)
+}
