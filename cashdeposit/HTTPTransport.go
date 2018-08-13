@@ -30,12 +30,12 @@ func NewHTTPHandler(e Endpoints, logger log.Logger) http.Handler {
 		encodeHTTPGenericResponse,
 		options...,
 	)
-	// accountsHandler := httptransport.NewServer(
-	// 	e.AccountEndpoint,
-	// 	decodeHTTPAccount,
-	// 	encodeHTTPGenericResponse,
-	// 	options...,
-	// )
+	totalBalanceHandler := httptransport.NewServer(
+		e.TotalBalanceEndpoint,
+		decodeHTTPTotalBalance,
+		encodeHTTPGenericResponse,
+		options...,
+	)
 	// newAccountsHandler := httptransport.NewServer(
 	// 	e.NewAccountEndpoint,
 	// 	decodeHTTPNewAccount,
@@ -46,8 +46,7 @@ func NewHTTPHandler(e Endpoints, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 
 	r.Handle("/v1/cash-deposits", listDepositsHandler).Methods("GET")
-	// r.Handle("/v1/accounts", newAccountsHandler).Methods("POST")
-	// r.Handle("/v1/accounts/{accountID}", accountsHandler).Methods("GET")
+	r.Handle("/v1/cash-deposits/account/{accountID}/balance", totalBalanceHandler).Methods("GET")
 
 	return r
 }
@@ -56,16 +55,17 @@ func decodeHTTPListDeposits(_ context.Context, r *http.Request) (request interfa
 	return listDepositsRequest{}, nil
 }
 
-// func decodeHTTPAccount(_ context.Context, r *http.Request) (request interface{}, err error) {
-// 	vars := mux.Vars(r)
-// 	accountID, ok := vars["accountID"]
-// 	if !ok {
-// 		return nil, ErrBadRouting
-// 	}
-// 	return accountRequest{
-// 		AccountID: accountID,
-// 	}, nil
-// }
+func decodeHTTPTotalBalance(_ context.Context, r *http.Request) (request interface{}, err error) {
+	vars := mux.Vars(r)
+	accountID, ok := vars["accountID"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+	return totalBalanceRequest{
+		AccountID: accountID,
+	}, nil
+}
+
 // func decodeHTTPNewAccount(_ context.Context, r *http.Request) (request interface{}, err error) {
 // 	req := newAccountRequest{}
 

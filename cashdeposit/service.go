@@ -18,7 +18,7 @@ var (
 // Service of accounts
 type Service interface {
 	ListDeposits() ([]CashDeposit, error)
-	TotalBalance(accountID string) (int64, error)
+	TotalBalance(accountID string) (TotalBalance, error)
 }
 
 // New return Service
@@ -54,7 +54,7 @@ func (s *setService) ListDeposits() ([]CashDeposit, error) {
 	}
 	return deposits, nil
 }
-func (s *setService) TotalBalance(accountID string) (int64, error) {
+func (s *setService) TotalBalance(accountID string) (TotalBalance, error) {
 	balance, err := s.store.GetTotalBalance(accountID)
 	if err != nil {
 		return balance, err

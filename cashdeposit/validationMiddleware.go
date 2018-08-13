@@ -17,6 +17,12 @@ type validMiddleware struct {
 func (mw *validMiddleware) ListDeposits() ([]CashDeposit, error) {
 	return mw.next.ListDeposits()
 }
+func (mw *validMiddleware) TotalBalance(accountID string) (balacne TotalBalance, err error) {
+	if accountID == "" {
+		return balacne, ErrBadRouting
+	}
+	return mw.next.TotalBalance(accountID)
+}
 
 // func (mw *validMiddleware) Account(accountID string) (account Account, err error) {
 // 	if accountID == "" {

@@ -24,18 +24,10 @@ func (mw *storeLogMiddleware) GetListDeposits() (cd []CashDeposit, err error) {
 
 	return mw.next.GetListDeposits()
 }
+func (mw *storeLogMiddleware) GetTotalBalance(accountID string) (balance TotalBalance, err error) {
+	defer func() {
+		mw.logger.Log("method", "GetTotalBalance", "accountID", accountID, "balance", balance.Balance, "err", err)
+	}()
 
-// func (mw *storeLogMiddleware) GetAccount(accountID string) (account Account, err error) {
-// 	defer func() {
-// 		mw.logger.Log("method", "GetAccount", "err", err)
-// 	}()
-
-// 	return mw.next.GetAccount(accountID)
-// }
-// func (mw *storeLogMiddleware) PostAccount(account Account) (err error) {
-// 	defer func() {
-// 		mw.logger.Log("method", "PostAccount", "err", err)
-// 	}()
-
-// 	return mw.next.PostAccount(account)
-// }
+	return mw.next.GetTotalBalance(accountID)
+}

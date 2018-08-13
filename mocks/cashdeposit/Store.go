@@ -31,3 +31,24 @@ func (_m *Store) GetListDeposits() ([]cashdeposit.CashDeposit, error) {
 
 	return r0, r1
 }
+
+// GetTotalBalance provides a mock function with given fields: accountID
+func (_m *Store) GetTotalBalance(accountID string) (cashdeposit.TotalBalance, error) {
+	ret := _m.Called(accountID)
+
+	var r0 cashdeposit.TotalBalance
+	if rf, ok := ret.Get(0).(func(string) cashdeposit.TotalBalance); ok {
+		r0 = rf(accountID)
+	} else {
+		r0 = ret.Get(0).(cashdeposit.TotalBalance)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(accountID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

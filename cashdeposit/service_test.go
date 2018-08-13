@@ -83,26 +83,30 @@ func TestListDeposits(t *testing.T) {
 }
 
 func TestTotalBalance(t *testing.T) {
+	totalBalance := cashdeposit.TotalBalance{Balance: 10000}
+	totalBalanceZero := totalBalance
+	totalBalanceZero.Balance = 0
+
 	tests := map[string]struct {
-		output     int64
+		output     cashdeposit.TotalBalance
 		input      string
 		err        error
 		goldenFile string
 	}{
 		"Success": {
-			output:     100000,
+			output:     totalBalance,
 			input:      singleDeposit.AccountID,
 			err:        nil,
 			goldenFile: "testdata/total-balance/success",
 		},
 		"Success while balance zero": {
-			output:     0,
+			output:     totalBalanceZero,
 			input:      singleDeposit.AccountID,
 			err:        nil,
 			goldenFile: "testdata/total-balance/success-whlie-zero",
 		},
 		"Failure While db error": {
-			output:     0,
+			output:     totalBalanceZero,
 			input:      singleDeposit.AccountID,
 			err:        cashdeposit.ErrDatabase,
 			goldenFile: "testdata/total-balance/failure-db-error",
@@ -112,7 +116,7 @@ func TestTotalBalance(t *testing.T) {
 	for testName, test := range tests {
 		t.Run(testName, func(t *testing.T) {
 			res := httptest.NewRecorder()
-			url := baseUrl + "/" + test.input + "/balance"
+			url := baseUrl + "/account/" + test.input + "/balance"
 			req, err := http.NewRequest("GET", url, nil)
 			assert.Nil(t, err)
 

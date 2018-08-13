@@ -30,6 +30,13 @@ func (mw *serviceLogMiddleware) ListDeposits() (cd []CashDeposit, err error) {
 
 	return mw.next.ListDeposits()
 }
+func (mw *serviceLogMiddleware) TotalBalance(accountID string) (balacne TotalBalance, err error) {
+	defer func() {
+		mw.logger.Log("method", "TotalBalance", "accountID", accountID, "totalBalance", balacne.Balance, "err", err)
+	}()
+
+	return mw.next.TotalBalance(accountID)
+}
 
 // func (mw *serviceLogMiddleware) Account(accountID string) (account Account, err error) {
 // 	defer func() {

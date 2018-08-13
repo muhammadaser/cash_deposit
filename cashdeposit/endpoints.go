@@ -11,7 +11,7 @@ import (
 // Endpoints list of Service endpoint
 type Endpoints struct {
 	ListDepositsEndpoint endpoint.Endpoint
-	// AccountEndpoint      endpoint.Endpoint
+	TotalBalanceEndpoint endpoint.Endpoint
 	// NewAccountEndpoint   endpoint.Endpoint
 }
 
@@ -22,11 +22,11 @@ func NewEndpoint(svc Service, logger log.Logger) Endpoints {
 		listDepositsEndpoint = MakeListDepositsEndpoint(svc)
 		listDepositsEndpoint = LoggingEndpointMiddleware(logger)(listDepositsEndpoint)
 	}
-	// var accountEndpoint endpoint.Endpoint
-	// {
-	// 	accountEndpoint = MakeAccountEndpoint(svc)
-	// 	accountEndpoint = LoggingEndpointMiddleware(logger)(accountEndpoint)
-	// }
+	var totalBalanceEndpoint endpoint.Endpoint
+	{
+		totalBalanceEndpoint = MakeTotalBalanceEndpoint(svc)
+		totalBalanceEndpoint = LoggingEndpointMiddleware(logger)(totalBalanceEndpoint)
+	}
 	// var newAccountEndpoint endpoint.Endpoint
 	// {
 	// 	newAccountEndpoint = MakeNewAccountEndpoint(svc)
@@ -35,7 +35,7 @@ func NewEndpoint(svc Service, logger log.Logger) Endpoints {
 
 	return Endpoints{
 		ListDepositsEndpoint: listDepositsEndpoint,
-		// AccountEndpoint:      accountEndpoint,
+		TotalBalanceEndpoint: totalBalanceEndpoint,
 		// NewAccountEndpoint:   newAccountEndpoint,
 	}
 }
@@ -56,25 +56,21 @@ func MakeListDepositsEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-// // MakeAccountEndpoint for account endpoint
-// func MakeAccountEndpoint(svc Service) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(accountRequest)
-// 		account, err := svc.Account(req.AccountID)
-// 		res := accountResponse{Account: account, Err: err}
-// 		if err == nil {
-// 			res.Code = http.StatusOK
-// 			res.Message = "success"
-// 		} else if err == ErrAccountNotFound {
-// 			res.Code = http.StatusOK
-// 			res.Message = err.Error()
-// 			res.Err = nil
-// 		} else {
-// 			res.Message = err.Error()
-// 		}
-// 		return res, nil
-// 	}
-// }
+// MakeTotalBalanceEndpoint for account endpoint
+func MakeTotalBalanceEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(totalBalanceRequest)
+		balance, err := svc.TotalBalance(req.AccountID)
+		res := totalBalanceResponse{Balance: balance, Err: err}
+		if err == nil {
+			res.Code = http.StatusOK
+			res.Message = "success"
+		} else {
+			res.Message = err.Error()
+		}
+		return res, nil
+	}
+}
 
 // // MakeNewAccountEndpoint for New account
 // func MakeNewAccountEndpoint(svc Service) endpoint.Endpoint {
@@ -112,19 +108,19 @@ type listDepositsResponse struct {
 
 func (r listDepositsResponse) Failed() error { return r.Err }
 
-// //====== Account ======
-// type accountRequest struct {
-// 	AccountID string
-// }
+//====== Account ======
+type totalBalanceRequest struct {
+	AccountID string
+}
 
-// type accountResponse struct {
-// 	Code    int     `json:"code,omitempty"`
-// 	Message string  `json:"message,omitempty"`
-// 	Account Account `json:"data"`
-// 	Err     error   `json:"-"`
-// }
+type totalBalanceResponse struct {
+	Code    int          `json:"code,omitempty"`
+	Message string       `json:"message,omitempty"`
+	Balance TotalBalance `json:"data"`
+	Err     error        `json:"-"`
+}
 
-// func (r accountResponse) Failed() error { return r.Err }
+func (r totalBalanceResponse) Failed() error { return r.Err }
 
 // //====== New Account ======
 // type newAccountRequest struct {

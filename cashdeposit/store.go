@@ -9,7 +9,7 @@ import (
 // Store of products
 type Store interface {
 	GetListDeposits() ([]CashDeposit, error)
-	GetTotalBalance(accountID string) (int64, error)
+	GetTotalBalance(accountID string) (TotalBalance, error)
 	// PostAccount(account Account) error
 }
 
@@ -32,17 +32,20 @@ type CashDeposit struct {
 	DepositAmount int64     `json:"deposit_amount" valid:"required"`
 }
 
+// TotalBalance nasabah berdasarkan account id
+type TotalBalance struct {
+	Balance int64 `json:"balance"`
+}
+
 func (s *setStore) GetListDeposits() ([]CashDeposit, error) {
 	cashDeposits := []CashDeposit{}
 	_, err := s.pgDB.Query(&cashDeposits, "select * from public.cash_deposit")
 	return nil, err
 }
-func (s *setStore) GetTotalBalance(accountID string) (int64, error) {
-	tb := struct {
-		balance int64
-	}{}
+func (s *setStore) GetTotalBalance(accountID string) (TotalBalance, error) {
+	tb := TotalBalance{}
 	_, err := s.pgDB.Query(&tb, "select sum(deposit_amount) as balance from public.cash_deposit")
-	return tb.balance, err
+	return tb, err
 }
 
 // func (s *setStore) GetAccount(accountID string) (Account, error) {
