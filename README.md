@@ -2,6 +2,160 @@
 
 Aplikasi Cash Deposit untuk T.N Assignment.
 
+- [Rancangan Aplikasi](#rancangan-aplikasi)
+  - [Usecase Diagram](#usecase-diagram)
+  - [Activity Diagram](#activity-diagram)
+  - [Class Diagram](#class-diagram)
+  - [ER Diagram](#er-diagram)
+- [Install Dependency](#install-dependency)
+- [Run Aplication](#run-aplication)
+- [Route untuk Backend](#route-untuk-backend)
+  - Accounts
+    - [List Accounts](#list-accounts)
+    - [Single Account](#single-account)
+    - [New Account](#new-account)
+  - Cash Deposit
+    - [List Deposits](#list-deposits)
+    - [List Deposits By Account](#list-deposits-by-account)
+    - [Total Balance](#total-balance)
+    - [New Cash Deposit](#new-cash-deposit)
+- [Route untuk Frontend](#route-untuk-frontend)
+- [Database Schema](#database-schema)
+- [Mail Trap](#mail-trap)
+
+## Rancangan Aplikasi
+
+### Usecase Diagram
+
+Rancangan Usecase diagram sebagai berikut
+
+![usecase diagram](design/tn-usecase-diagram.jpg)
+
+### Activity Diagram
+
+Rancangan Activity diagram sebagai berikut
+
+![activity diagram](design/tn-activity-diagram.jpg)
+
+### Class Diagram
+
+Rancangan Class diagram sebagai berikut
+
+![Class diagram](design/tn-class-diagram.jpg)
+
+### ER Diagram
+
+Rancangan ER diagram sebagai berikut
+
+![er diagram](design/tn-er-diagram.jpg)
+
+## Install Dependency
+
+Pertama buat database menggunakan database `postgresql`. Untuk instruksi nya bisa di lihat pada bagian [Database Schema](#database-schema). Setelah database di buat, pastikan konfigurasi nya sesuai, dapat di robah pada file [config.yml](config.yml).
+
+install dependency menggunakan `dep`
+
+```sh
+dep ensure
+```
+
+## Run aplication
+
+Pertama `cd /to/path`, lalu
+
+```sh
+go run main.go
+```
+
+Setelah aplikasi backend jalan, selanjut nya jalankan aplikasi [Forntend](https://github.com/muhammadaser/cash_deposit_frontend).
+
+## Route untuk Backend
+
+Route untuk backend seperti berikut :
+
+### Accounts
+
+#### List Accounts
+
+Menggunakan route
+
+```url
+GET /cash-deposit/v1/accounts
+```
+
+#### Single Account
+
+Menggunakan route
+
+```url
+GET /cash-deposit/v1/accounts/{accountID}
+```
+
+#### New Account
+
+Menggunakan route
+
+```url
+POST /cash-deposit/v1/accounts
+```
+
+body
+
+```json
+{
+    "account_id":"03212546",
+    "first_name":"Jhone",
+    "last_name":"Doe",
+    "email":"jhone.doe@gmail.com",
+    "phone_no":"085263123456",
+    "address":"Jakarta"
+}
+```
+
+### Cash Deposit
+
+#### List Deposits
+
+Menggunakan route
+
+```url
+GET /cash-deposit/v1/deposits
+```
+
+#### List Deposits By Account
+
+Menggunakan route
+
+```url
+GET /cash-deposit/v1/deposits/account/{accountID}
+```
+
+#### Total Balance
+
+Menggunakan route
+
+```url
+GET /cash-deposit/v1/deposits/account/{accountID}/balance
+```
+
+#### New Cash Deposit
+
+Menggunakan route
+
+```url
+POST /cash-deposit/v1/deposits
+```
+
+body
+
+```json
+{
+    "deposit_id":"201808013849",
+    "account_id":"03212546",
+    "deposit_amount":100000
+}
+```
+
 ## Route untuk Frontend
 
 Berikut Route untuk Frontend :
@@ -69,7 +223,6 @@ Halaman Deposit History merupakah halaman yang menampilkan history dari transaks
 ```
 
 Halaman Cash Deposit merupakan halaman untuk transaksi deposit uang ke bank. Halaman ini menampilkan form inputan untuk deposit uang ke account nasabah.
-
 
 ## Database Schema
 
